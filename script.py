@@ -21,20 +21,25 @@ def treat_image(file_name, file_dir):
             image = face_recognition.load_image_file(file_name)
             face_locations = face_recognition.face_locations(image)
 
-            
-            offsetx = 40
-            offsety = 40
             n = 0
+            #ar = 23/30
+            size = 115, 150
             for face_location in face_locations:
                 top, right, bottom, left = face_location
-                print("top: {}, left: {}, bottom: {}, right: {}".format(top,left, bottom, right))
-                face_image = image[top-offsety:bottom+offsety, left-offsetx:right+offsetx]
+                
+                min_top = top*0.05
+                max_bottom = bottom*1.6
+                min_left = left*0.05
+                max_right = right*1.6
+
+                face_image = image[int(max(top, min_top)):int(min(bottom, max_bottom)), int(max(left, min_left)):int(min(right, max_right))]
                 pil_image = Image.fromarray(face_image)
                 if( n > 0):
                     print("{}/{}_{}{}".format(results_dir, os.path.splitext(os.path.basename(file_name))[0], n, os.path.splitext(os.path.basename(file_name))[1]))
                 else:
                     print("{}/{}".format(results_dir, os.path.basename(file_name)))
                 n = n + 1
+                pil_image.thumbnail(size)
                 pil_image.save(results_dir+"/"+os.path.basename(file_name))
                 
 # traverse root directory, and list directories as dirs and files as files
