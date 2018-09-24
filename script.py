@@ -20,6 +20,7 @@ def treat_image(file_name, file_dir):
                 
             image = face_recognition.load_image_file(file_name)
             face_locations = face_recognition.face_locations(image)
+            original_pil_img = Image.fromarray(image)
 
             n = 0
             #ar = 23/30
@@ -27,12 +28,12 @@ def treat_image(file_name, file_dir):
             for face_location in face_locations:
                 top, right, bottom, left = face_location
                 
-                min_top = top*0.05
-                max_bottom = bottom*1.6
-                min_left = left*0.05
-                max_right = right*1.6
+                min_top = top*0.3
+                max_bottom = bottom*1.4
+                min_left = left*0.4
+                max_right = right*1.4
 
-                face_image = image[int(max(top, min_top)):int(min(bottom, max_bottom)), int(max(left, min_left)):int(min(right, max_right))]
+                face_image = image[int(max(0, min_top)):int(min(original_pil_img.height, max_bottom)), int(max(0, min_left)):int(min(original_pil_img.width, max_right))]
                 pil_image = Image.fromarray(face_image)
                 if( n > 0):
                     print("{}/{}_{}{}".format(results_dir, os.path.splitext(os.path.basename(file_name))[0], n, os.path.splitext(os.path.basename(file_name))[1]))
