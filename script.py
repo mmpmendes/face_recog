@@ -24,23 +24,32 @@ def treat_image(file_name, file_dir):
 
             n = 0
             #ar = 23/30
-            size = 115, 150
+            size = 500, 652
             for face_location in face_locations:
                 top, right, bottom, left = face_location
                 
-                min_top = top*0.3
-                max_bottom = bottom*1.4
+                min_top = 0
+                max_bottom = original_pil_img.height
                 min_left = left*0.4
                 max_right = right*1.4
 
-                face_image = image[int(max(0, min_top)):int(min(original_pil_img.height, max_bottom)), int(max(0, min_left)):int(min(original_pil_img.width, max_right))]
+                final_width = min(original_pil_img.width, max_right) - max(0, min_left)
+                final_height = final_width * 652/500
+
+                delta_height = final_height - (min(original_pil_img.height, max_bottom) - max(0, min_top))
+                #print(final_width)
+                #print(final_height)
+                #print(delta_height)
+
+                face_image = image[int(max(0, min_top+(delta_height/2))):int(min(original_pil_img.height, max_bottom+(delta_height/2))), int(max(0, min_left)):int(min(original_pil_img.width, max_right))]
                 pil_image = Image.fromarray(face_image)
                 if( n > 0):
                     print("{}/{}_{}{}".format(results_dir, os.path.splitext(os.path.basename(file_name))[0], n, os.path.splitext(os.path.basename(file_name))[1]))
                 else:
                     print("{}/{}".format(results_dir, os.path.basename(file_name)))
                 n = n + 1
-                pil_image.thumbnail(size)
+                final_size = final_width, final_height
+                pil_image.thumbnail(final_size)
                 pil_image.save(results_dir+"/"+os.path.basename(file_name))
                 
 # traverse root directory, and list directories as dirs and files as files
