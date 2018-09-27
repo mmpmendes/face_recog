@@ -1,6 +1,6 @@
 # face_recog
 
-download & install python3
+download & install python3 \n
 pip3 install --upgrade pip
 download & install CMake
 donwload & install Visual Studio Community with C++ libraries
