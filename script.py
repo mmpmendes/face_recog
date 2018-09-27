@@ -8,7 +8,7 @@ def treat_image(file_name, file_dir):
         #print(file_name)
         if file_name.lower().endswith(('.png', '.jpg', '.jpeg')):
             
-            #Cria diretorias para guardar os resultados se não existem
+            #Cria diretorias para guardar os resultados se nao existem
             results_dir = os.path.dirname(file_name)+"_resultados"
             
             if(not os.path.isdir(results_dir)):
@@ -23,25 +23,50 @@ def treat_image(file_name, file_dir):
             original_pil_img = Image.fromarray(image)
 
             n = 0
-            #ar = 23/30
-            size = 500, 652
             for face_location in face_locations:
                 top, right, bottom, left = face_location
+                # quadrado da cara
                 
-                min_top = 0
-                max_bottom = original_pil_img.height
-                min_left = left*0.4
-                max_right = right*1.4
+                # buffer para a cara
+                # incluir cabelo, pescoco etc
 
-                final_width = min(original_pil_img.width, max_right) - max(0, min_left)
-                final_height = final_width * 652/500
+                face_width = right-left
+                face_height = bottom-top
 
-                delta_height = final_height - (min(original_pil_img.height, max_bottom) - max(0, min_top))
-                #print(final_width)
-                #print(final_height)
-                #print(delta_height)
+                min_top = top - face_height*0.2
+                max_bottom = bottom + face_height*0.8
 
-                face_image = image[int(max(0, min_top+(delta_height/2))):int(min(original_pil_img.height, max_bottom+(delta_height/2))), int(max(0, min_left)):int(min(original_pil_img.width, max_right))]
+                min_left = left - face_width*1.05
+                max_right = right + face_width
+
+                final_width = original_pil_img.width
+                final_height = original_pil_img.height
+
+                if original_pil_img.width > original_pil_img.height:
+                    # caso a foto esteja em portrait
+                    # fixa a largura
+                    # calcula a altura
+                    final_width = max_right - min_left
+                    final_height = final_width * 150/115
+                    
+                else:
+                    # caso a foto esteja em landscape
+                    # fixa a altura
+                    # calcula a largura consoante o ASPECT RATIO
+                    final_height = max_bottom - min_top
+                    final_width = final_height * 115/150
+                    
+                # crop imagem no formato correto
+                # centro da cara esta em ((right-left)/2, (bottom-top)/2)
+                center_x = min_left + (max_right-min_left)/2
+                x_min = int(max(center_x - final_width/2, 0))
+                x_max = int(min(center_x + final_width/2, original_pil_img.width))
+
+                center_y = min_top + (bottom-min_top)/2
+                y_min = int(max(center_y - final_height/2, 0))
+                y_max = int(min(center_y + final_height/2, original_pil_img.height))
+
+                face_image = image[y_min:y_max, x_min:x_max]
                 pil_image = Image.fromarray(face_image)
                 if( n > 0):
                     print("{}/{}_{}{}".format(results_dir, os.path.splitext(os.path.basename(file_name))[0], n, os.path.splitext(os.path.basename(file_name))[1]))
@@ -59,4 +84,4 @@ for dirpath, dirnames, filenames in os.walk("./fotos"):
     print("Ficheiros: {}".format(len(filenames))) 
     for filename in filenames:
         treat_image(os.path.join(dirpath, filename), dirpath)
-    print("Próxima diretoria.\n")
+    print("Proxima diretoria.\n")
