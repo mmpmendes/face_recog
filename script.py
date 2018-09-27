@@ -43,21 +43,28 @@ def treat_image(file_name, file_dir):
                 final_height = original_pil_img.height
 
                 if original_pil_img.width > original_pil_img.height:
-                    # caso a foto esteja em portrait
+                    # caso a foto esteja em landscape
                     # fixa a largura
                     # calcula a altura
-                    final_width = max_right - min_left
-                    final_height = final_width * 150/115
+                    final_height = max_bottom - min_top
+                    final_width = final_height * 115/150
+                    print("BADJOURAS")
                     if final_height > original_pil_img.height:
+                        print("BALILI")
                         final_height = original_pil_img.height
                         final_width = final_height * 115/150
                     
                 else:
-                    # caso a foto esteja em landscape
+                    # caso a foto esteja em portrait
                     # fixa a altura
                     # calcula a largura consoante o ASPECT RATIO
-                    final_height = max_bottom - min_top
-                    final_width = final_height * 115/150
+                    final_width = max_right - min_left
+                    final_height = final_width * 150/115
+                    print("HERE")
+                    if final_height > original_pil_img.height:
+                        final_height = original_pil_img.height
+                        final_width = final_height * 115/150
+                        print("PTARA")
                     
                 # crop imagem no formato correto
                 # centro da cara esta em ((right-left)/2, (bottom-top)/2)
@@ -84,7 +91,7 @@ def treat_image(file_name, file_dir):
                 pil_image.save(results_dir+"/"+os.path.basename(file_name))
                 
 # traverse root directory, and list directories as dirs and files as files
-for dirpath, dirnames, filenames in os.walk("./f2"):
+for dirpath, dirnames, filenames in os.walk("./fotos"):
     print(dirpath)
     print("Sub-diretorias: {}".format(len(dirnames)))
     print("Ficheiros: {}".format(len(filenames))) 
