@@ -48,6 +48,9 @@ def treat_image(file_name, file_dir):
                     # calcula a altura
                     final_width = max_right - min_left
                     final_height = final_width * 150/115
+                    if final_height > original_pil_img.height:
+                        final_height = original_pil_img.height
+                        final_width = final_height * 115/150
                     
                 else:
                     # caso a foto esteja em landscape
@@ -73,12 +76,15 @@ def treat_image(file_name, file_dir):
                 else:
                     print("{}/{}".format(results_dir, os.path.basename(file_name)))
                 n = n + 1
-                final_size = final_width, final_height
+
+                final_size = int(final_width), int(final_height)
+                print(final_size)
+                pil_image.resize(final_size)
                 pil_image.thumbnail(final_size)
                 pil_image.save(results_dir+"/"+os.path.basename(file_name))
                 
 # traverse root directory, and list directories as dirs and files as files
-for dirpath, dirnames, filenames in os.walk("./fotos"):
+for dirpath, dirnames, filenames in os.walk("./f2"):
     print(dirpath)
     print("Sub-diretorias: {}".format(len(dirnames)))
     print("Ficheiros: {}".format(len(filenames))) 
