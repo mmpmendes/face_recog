@@ -4,12 +4,18 @@ import errno
 import sys
 import csv
 import datetime
+import cv2
 from PIL import Image
-
 
 if len(sys.argv) < 2:
     print("Please pass folder argument")
     sys.exit()
+
+if len(sys.argv) > 2 and sys.argv[2] == 'debug':
+    debug = True
+else:
+    debug = False
+
 
 report_header = ['Ficheiro', 'Resolucao_Original', 'Resolucao_Calculada', 'Aspect_Ratio_Calculado', 'Erro_Calculo']
 report_lines = []
@@ -36,6 +42,7 @@ def treat_image(file_name, file_dir):
             n = 0
             for face_location in face_locations:
                 top, right, bottom, left = face_location
+
                 # quadrado da cara
                 
                 # buffer para a cara
@@ -44,14 +51,29 @@ def treat_image(file_name, file_dir):
                 face_width = right-left
                 face_height = bottom-top
 
-                min_top = max(top - face_height*0.2, 0)
-                max_bottom = min(bottom + face_height, original_pil_img.height)
+                min_top = max(top - face_height*0.6, 0)
+                max_bottom = min(bottom + face_height*0.6, original_pil_img.height)
 
-                min_left = max(left - face_width*1.05, 0)
-                max_right = min(right + face_width, original_pil_img.width)
+                min_left = max(left - face_width*0.5, 0)
+                max_right = min(right + face_width*0.5, original_pil_img.width)
 
-                final_width = original_pil_img.width
-                final_height = original_pil_img.height
+                if max_right-abs(min_left) > original_pil_img.width:
+                    final_width = original_pil_img.width
+                else:
+                    final_width = max_right-abs(min_left)
+
+                if max_bottom-abs(min_top) > original_pil_img.height:
+                    final_height = original_pil_img.height
+                else:
+                    final_height = max_bottom-abs(min_top)
+
+                if debug:
+                    originalImage = cv2.imread(file_name)
+                    # Draw a box around the face
+                    cv2.rectangle(originalImage, (int(left), int(top)), (int(right), int(bottom)), (0, 255, 0), 5)
+                    cv2.rectangle(originalImage, (int(min_left), int(min_top)), (int(max_right), int(max_bottom)), (0, 0, 255), 4)
+                    cv2.imwrite(results_dir+"/"+os.path.splitext(os.path.basename(file_name))[0]+"_debug"+
+                    os.path.splitext(os.path.basename(file_name))[1],originalImage)
 
                 if original_pil_img.width >= original_pil_img.height:
                     # caso a foto esteja em landscape
@@ -122,8 +144,9 @@ for dirpath, dirnames, filenames in os.walk(sys.argv[1]):
         treat_image(os.path.join(dirpath, filename), dirpath)
     print("Proxima diretoria.\n")
 
-with open('report-{}.csv'.format(datetime.datetime.now()), 'w', newline='') as csvfile:
-    report_writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-    report_writer.writerow(report_header)
-    for line in report_lines:
-        report_writer.writerow(line)
+if not debug:
+    with open('report-{}.csv'.format(datetime.datetime.now()), 'w', newline='') as csvfile:
+        report_writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+        report_writer.writerow(report_header)
+        for line in report_lines:
+            report_writer.writerow(line)
