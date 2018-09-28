@@ -1,7 +1,13 @@
 import face_recognition
 import os
 import errno
+import sys
 from PIL import Image
+
+
+if len(sys.argv) < 2:
+    print("Please pass folder argument")
+    sys.exit()
 
 def treat_image(file_name, file_dir):
     
@@ -48,9 +54,7 @@ def treat_image(file_name, file_dir):
                     # calcula a altura
                     final_height = max_bottom - min_top
                     final_width = final_height * 115/150
-                    print("BADJOURAS")
                     if final_height > original_pil_img.height:
-                        print("BALILI")
                         final_height = original_pil_img.height
                         final_width = final_height * 115/150
                     
@@ -60,11 +64,9 @@ def treat_image(file_name, file_dir):
                     # calcula a largura consoante o ASPECT RATIO
                     final_width = max_right - min_left
                     final_height = final_width * 150/115
-                    print("HERE")
                     if final_height > original_pil_img.height:
                         final_height = original_pil_img.height
                         final_width = final_height * 115/150
-                        print("PTARA")
                     
                 # crop imagem no formato correto
                 # centro da cara esta em ((right-left)/2, (bottom-top)/2)
@@ -85,13 +87,13 @@ def treat_image(file_name, file_dir):
                 n = n + 1
 
                 final_size = int(final_width), int(final_height)
-                print(final_size)
+
                 pil_image.resize(final_size)
                 pil_image.thumbnail(final_size)
                 pil_image.save(results_dir+"/"+os.path.basename(file_name))
                 
 # traverse root directory, and list directories as dirs and files as files
-for dirpath, dirnames, filenames in os.walk("./fotos"):
+for dirpath, dirnames, filenames in os.walk(sys.argv[1]):
     print(dirpath)
     print("Sub-diretorias: {}".format(len(dirnames)))
     print("Ficheiros: {}".format(len(filenames))) 
